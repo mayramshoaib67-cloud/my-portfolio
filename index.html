@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Maryam Shoaib — Graphic Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .nav-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: currentColor;
+    margin: 5px 0;
+    transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.25s ease;
+    transform-origin: center;
+  }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .mobile-menu {
+    display: flex !important;
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: max-height 0.4s cubic-bezier(.4,0,.2,1), opacity 0.3s ease, transform 0.3s ease;
+  }
+  .mobile-menu.open {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .mobile-menu a {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .mobile-menu.open a {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ---------- Accessible motion ---------- */
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => {
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  return reduced;
+}
+function TypedRole() {
+  const reduced = useReducedMotion();
+  const [text, setText] = useState('Graphic Designer');
+  useEffect(() => {
+    if (reduced) return;
+    const roles = ['Graphic Designer', 'UI Designer', 'Brand Designer'];
+    let word = 0, count = roles[0].length, deleting = true, timer;
+    const tick = () => {
+      if (document.hidden) {timer = setTimeout(tick, 500); return;}
+      count += deleting ? -1 : 1;
+      setText(roles[word].slice(0, count));
+      let delay = deleting ? 45 : 85;
+      if (count === 0) {deleting = false; word = (word + 1) % roles.length; delay = 300;}
+      else if (count === roles[word].length) {deleting = true; delay = 2100;}
+      timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, 2100);
+    return () => clearTimeout(timer);
+  }, [reduced]);
+  return <div className="typed-role"><span className="sr-only">Graphic Designer, UI Designer and Brand Designer</span><span aria-hidden="true">{reduced ? 'Graphic & UI Designer' : text}<i className="typing-caret" /></span></div>;
+}
+function Counter({ value, suffix = '' }) {
+  const ref = useRef(null);
+  const [count, setCount] = useState(0);
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (reduced) {setCount(value); return;}
+    let frame;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const start = performance.now();
+      const tick = now => {
+        const progress = Math.min((now - start) / 1300, 1);
+        setCount(Math.round(value * (1 - Math.pow(1 - progress, 3))));
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    }, {threshold: .5});
+    observer.observe(ref.current);
+    return () => {observer.disconnect(); cancelAnimationFrame(frame);};
+  }, [value, reduced]);
+  return <span ref={ref}><span className="sr-only">{value}{suffix}</span><span aria-hidden="true">{count}{suffix}</span></span>;
+}
+function SocialLinks() {
+  return <div className="social-links">
+    <a href="https://linkedin.com/in/Maryam-shoaib" target="_blank" rel="noopener noreferrer" aria-label="Maryam Shoaib on LinkedIn" title="LinkedIn">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.5v11M6.5 4.5v.1M11 19.5v-11m0 5c0-6 7-6 7 0v6" /></svg>
+    </a>
+    <a href="mailto:mayramshoaib67@gmail.com" aria-label="Email Maryam Shoaib" title="Email">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg>
+    </a>
+  </div>;
+}
+function MotionEffects() {
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (reduced) return;
+    const fine = matchMedia('(hover: hover) and (pointer: fine)');
+    const cursor = document.querySelector('.cursor-ring');
+    const hero = document.querySelector('.collage-wrap');
+    const heroBackground = document.querySelector('.hero');
+    let pointerFrame = 0, scrollFrame = 0, activeButton, activeCard;
+    let latest;
+    function clearButton() {if (activeButton) {activeButton.style.removeProperty('--mx');activeButton.style.removeProperty('--my');activeButton = null;}}
+    function clearCard() {if (activeCard) {activeCard.style.removeProperty('--rx');activeCard.style.removeProperty('--ry');activeCard = null;}}
+    function move(e) {
+      if (!fine.matches) return;
+      latest = e;
+      if (pointerFrame) return;
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        const {clientX:x, clientY:y, target} = latest;
+        cursor.style.setProperty('--cx', `${x}px`);cursor.style.setProperty('--cy', `${y}px`);
+        cursor.classList.add('visible');cursor.classList.toggle('interactive', !!target.closest('a,button'));
+        const button = [...document.querySelectorAll('.btn,.social-links a,.nav-cta')].find(el => {
+          const r = el.getBoundingClientRect();return x > r.left - 22 && x < r.right + 22 && y > r.top - 22 && y < r.bottom + 22;
+        });
+        if (activeButton !== button) clearButton();
+        if (button) {activeButton = button;const r = button.getBoundingClientRect();button.style.setProperty('--mx', `${Math.max(-8,Math.min(8,(x-r.left-r.width/2)*.13))}px`);button.style.setProperty('--my', `${Math.max(-6,Math.min(6,(y-r.top-r.height/2)*.18))}px`);}
+        const card = target.closest('.work-card');
+        if (activeCard !== card) clearCard();
+        if (card) {activeCard = card;const r=card.getBoundingClientRect();card.style.setProperty('--rx', `${-(y-r.top-r.height/2)/r.height*9}deg`);card.style.setProperty('--ry', `${(x-r.left-r.width/2)/r.width*9}deg`);}
+        if (heroBackground) {const r = heroBackground.getBoundingClientRect();if (y <= r.bottom) {heroBackground.style.setProperty('--gx', `${x/innerWidth*100}%`);heroBackground.style.setProperty('--gy', `${(y-r.top)/r.height*100}%`);}}
+      });
+    }
+    function leave() {cursor.classList.remove('visible');clearButton();clearCard();}
+    function scroll() {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => {scrollFrame = 0;if (hero && fine.matches) hero.style.setProperty('--parallax', `${Math.min(scrollY,700)*.12}px`);});
+    }
+    function transition(e) {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link) return;
+      const section = document.getElementById(link.getAttribute('href').slice(1));
+      if (section) section.animate([{filter:'brightness(.85)'},{filter:'brightness(1)'}],{duration:650,easing:'ease-out'});
+    }
+    document.addEventListener('pointermove',move,{passive:true});
+    document.documentElement.addEventListener('pointerleave',leave);
+    window.addEventListener('blur',leave);
+    window.addEventListener('scroll',scroll,{passive:true});
+    document.addEventListener('click',transition);
+    return () => {
+      document.removeEventListener('pointermove',move);document.documentElement.removeEventListener('pointerleave',leave);window.removeEventListener('blur',leave);window.removeEventListener('scroll',scroll);document.removeEventListener('click',transition);
+      cancelAnimationFrame(pointerFrame);cancelAnimationFrame(scrollFrame);leave();
+      if(hero) hero.style.removeProperty('--parallax');
+    };
+  }, [reduced]);
+  return <div className="cursor-ring" aria-hidden="true" />;
+}
+
+/* ---------- shared: scroll reveal hook ---------- */
+function useReveal(options = {}) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, ...options }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
+}
+
+function Reveal({ as: Tag = 'div', className = '', stagger = false, variant = 'up', children, ...rest }) {
+  const ref = useReveal();
+  const base = variant === 'left' ? 'reveal-left' : variant === 'zoom' ? 'reveal-zoom' : 'reveal';
+  const staggerClass = variant === 'left' ? 'reveal-left-stagger' : variant === 'zoom' ? 'reveal-zoom-stagger' : 'reveal-stagger';
+  return (
+    <Tag ref={ref} className={`${stagger ? staggerClass : base} ${className}`} {...rest}>
+      {children}
+    </Tag>
+  );
+}
+
+/* ---------- NAVBAR ---------- */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const links = [
+    ['About', '#about'],
+    ['Services', '#services'],
+    ['Skills', '#skills'],
+    ['Experience', '#experience'],
+    ['Contact', '#contact'],
+  ];
+  return (
+    <div className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+      <div className="container nav-inner">
+        <a href="#top" className="nav-mark"><span className="dot"></span>Maryam Shoaib</a>
+        <nav className="nav-links">
+          {links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+        </nav>
+        <a href="#contact" className="nav-cta">Let's talk</a>
+        <button className={`nav-toggle ${open ? 'open' : ''}`} aria-label="Toggle menu" aria-expanded={open} onClick={() => setOpen(o => !o)}>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div className={`mobile-menu ${open ? 'open' : ''}`}>
+        {links.map(([label, href], i) => (
+          <a key={href} href={href} style={{transitionDelay: open ? `${i * 45}ms` : '0ms'}} onClick={() => setOpen(false)}>{label}</a>
+        ))}
+        <a href="#contact" style={{transitionDelay: open ? `${links.length * 45}ms` : '0ms'}} onClick={() => setOpen(false)}>Let's talk</a>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- HERO ---------- */
+function Hero() {
+  return (
+    <section id="top" className="hero">
+      <div className="container hero-grid">
+        <div className="collage-wrap">
+          <div className="collage-bg has-photo" style={{backgroundImage:"url('maryam-shoaib.png')"}}></div>
+          <div className="collage-tag"><strong>Bahawalpur, PK</strong><br/>Graphic &amp; App Designer</div>
+        </div>
+        <div className="hero-copy">
+          <p className="eyebrow">Maryam Shoaib · Visual communication design</p>
+          <TypedRole />
+          <h1>Design that feels<br/>as good as it <em>looks.</em></h1>
+          <p className="lede">
+            I'm Maryam — a graphic designer working across branding, app interfaces and social
+            media, with a soft spot for design that puts people's wellbeing first.
+          </p>
+          <div className="hero-btns">
+            <a href="#portfolio" className="btn btn-primary">View my work</a>
+            <a href="#contact" className="btn btn-ghost">Get in touch</a>
+          </div>
+          <SocialLinks />
+          <div className="hero-stats">
+            <div><h3><Counter value={3} suffix="+" /></h3><span>Apps designed</span></div>
+            <div><h3><Counter value={2} /></h3><span>Design studios</span></div>
+            <div><h3><Counter value={1} /></h3><span>BA, Visual Comm. Design</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- ABOUT ---------- */
+function About() {
+  return (
+    <section id="about" className="about">
+      <div className="container about-grid about-grid-centered">
+        <Reveal as="div" stagger variant="left" className="about-copy">
+          <p className="eyebrow">About me</p>
+          <h2 style={{marginBottom:'22px'}}>A designer who starts<br/>with the person, not the pixel.</h2>
+          <p>
+            I hold a <strong>Bachelor's degree in Art and Design, majoring in Visual Communication
+            Design,</strong> from the Islamia University of Bahawalpur. Over the past few years I've
+            designed branding, social media and app interfaces for two studios — moving from an
+            internship into a full design role along the way.
+          </p>
+          <p>
+            My thesis explored <strong>app design for teenage mental health</strong>, which shaped
+            how I approach every project since: design should be usable, honest, and a little kind.
+            Day to day, I work in <strong>Photoshop, Illustrator, Figma and Canva</strong>, and pick
+            up basic video editing when a project needs it.
+          </p>
+          <div className="about-facts">
+            <div className="fact"><h4>Currently</h4><span>App &amp; Graphic Designer, QM Logics</span></div>
+            <div className="fact"><h4>Based in</h4><span>Bahawalpur, Pakistan</span></div>
+            <div className="fact"><h4>Focus</h4><span>Branding · UI · Social Media</span></div>
+            <div className="fact"><h4>Education</h4><span>BA Visual Comm. Design, 2021–2025</span></div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- SERVICES ---------- */
+const SERVICES = [
+  { icon:'✎', bg:'var(--pink-soft)', title:'Branding & Identity', text:'Logo marks, employee ID design and cohesive brand systems that hold together across every touchpoint.' },
+  { icon:'▢', bg:'var(--lavender-soft)', title:'App & UI Design', text:'Interfaces and user-experience elements for mobile apps, designed with function and feeling in mind.' },
+  { icon:'✺', bg:'var(--peach-soft)', title:'Social Media Design', text:'Scroll-stopping post templates and campaign visuals with a consistent, recognisable voice.' },
+  { icon:'▷', bg:'var(--pink-soft)', title:'Basic Video Editing', text:'Light promotional and internal video edits to round out a campaign when it needs to move.' },
+];
+function Services() {
+  return (
+    <section id="services">
+      <div className="container">
+        <Reveal className="section-head">
+          <p className="eyebrow">What I do</p>
+          <h2>A few things I'm good at.</h2>
+          <p>From first sketch to shipped screen, here's where I usually come in.</p>
+        </Reveal>
+        <Reveal stagger variant="zoom" className="services-grid">
+          {SERVICES.map((s) => (
+            <div className="service-card" key={s.title}>
+              <div className="service-icon" style={{background:s.bg}}>{s.icon}</div>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </div>
+          ))}
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- PORTFOLIO ---------- */
+const CATS = ['All','App/UI','Logo Design','Social Media','Posters','Packaging','Marketing'];
+const WORKS = [
+  { cat:'Posters', title:'Internal Wellness Poster Set', h:340, img:'images/internal-wellness-poster-set.png' },
+  { cat:'App/UI', title:'Affirmations App — Onboarding', h:380, img:'images/affirmations-app-onboarding.png' },
+  { cat:'Social Media', title:'QM Logics Campaign Series', h:260, img:'images/qm-logics-campaign.png' },
+  { cat:'Logo Design', title:'Mr Shef — App Mark', h:320, img:'images/mr-shef-app-mark.png' },
+  { cat:'Packaging', title:'Employee ID & Badge System', h:280, img:'images/employee-id-badge-system.png', pos:'center 20%' },
+  { cat:'App/UI', title:'Dream Interpretation App — Flow', h:360, img:'images/dream-interpretation-app-flow.png' },
+  { cat:'Marketing', title:'Teen Mental Health App — Thesis', h:400, img:'images/teen-mental-health-app.png' },
+  { cat:'Logo Design', title:'Mintastic Cars Insignia Design', h:300, img:'images/mintastic-cars-insignia.png' },
+];
+function WorkCard({ w }) {
+  const ref = useReveal();
+  return (
+    <div ref={ref} className="work-card" tabIndex="0" aria-label={w.title}>
+      <div className="work-art reveal-wipe" style={{ height: w.h, backgroundImage: `url(${w.img})`, backgroundSize:'cover', backgroundPosition: w.pos || 'center' }}>
+        <div className="work-overlay">
+          <span className="cat">{w.cat}</span>
+          <span className="title">{w.title}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+function Portfolio() {
+  const [active, setActive] = useState('All');
+  const [position, setPosition] = useState(0);
+  const [canNext, setCanNext] = useState(false);
+  const track = useRef(null);
+  const filtered = active === 'All' ? WORKS : WORKS.filter(w => w.cat === active);
+  useEffect(() => {
+    const el = track.current;
+    const update = () => setCanNext(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+    const resize = new ResizeObserver(update);
+    resize.observe(el);
+    el.addEventListener('scroll', update);
+    update();
+    return () => { resize.disconnect(); el.removeEventListener('scroll', update); };
+  }, [active]);
+  function move(direction) {
+    const el = track.current;
+    const step = el.firstElementChild.getBoundingClientRect().width + 24;
+    el.scrollBy({left: direction * step, behavior: 'smooth'});
+  }
+  return (
+    <section id="portfolio" className="portfolio">
+      <div className="container">
+        <Reveal className="section-head">
+          <p className="eyebrow">Selected work</p>
+          <h2>Featured projects.</h2>
+          <p>A mix of branding, app interfaces and campaign design — placeholders here, ready to be swapped for real project shots.</p>
+        </Reveal>
+        <div className="filter-row">
+          {CATS.map(c => <button key={c} aria-pressed={active === c} className={`filter-btn ${active===c ? 'active':''}`} onClick={() => {setActive(c); setPosition(0); track.current.scrollLeft = 0;}}>{c}</button>)}
+        </div>
+        <div className="project-carousel" ref={track} role="region" aria-label="Featured projects carousel" tabIndex="0"
+          onScroll={e => setPosition(e.currentTarget.scrollLeft)}>
+          {filtered.map(w => <WorkCard w={w} key={w.title} />)}
+        </div>
+        <div className="carousel-controls">
+          <span>{filtered.length} projects · swipe or use the arrows</span>
+          <div className="carousel-arrows">
+            <button aria-label="Previous projects" disabled={position < 2} onClick={() => move(-1)}>←</button>
+            <button aria-label="Next projects" disabled={!canNext} onClick={() => move(1)}>→</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- SKILLS ---------- */
+const TOOLS = [
+  { name:'Adobe Photoshop', level:5 },
+  { name:'Adobe Illustrator', level:4 },
+  { name:'Figma', level:4 },
+  { name:'Canva', level:5 },
+];
+const TAGS = ['Visual Communication Design','App/UI Design','Social Media Design','Branding','Employee ID Design','Video Editing','Typography','Layout & Composition','Client Collaboration'];
+function Marquee({ items, direction = 'left' }) {
+  const reduced = useReducedMotion();
+  return (
+    <div className={`marquee-track ${reduced ? 'no-scroll' : ''}`} style={{'--dir': direction === 'left' ? 'normal' : 'reverse'}}>
+      <div className="marquee-group">
+        {items.map((t, i) => <span className="skill-card" key={`a-${i}`}>{t}</span>)}
+      </div>
+      <div className="marquee-group" aria-hidden="true">
+        {items.map((t, i) => <span className="skill-card" key={`b-${i}`}>{t}</span>)}
+      </div>
+    </div>
+  );
+}
+function Skills() {
+  const half = Math.ceil(TAGS.length / 2);
+  const row1 = TAGS.slice(0, half);
+  const row2 = TAGS.slice(half);
+  return (
+    <section id="skills" className="skills">
+      <div className="container">
+        <Reveal as="div" stagger>
+          <p className="eyebrow">Tools</p>
+          <h2 style={{marginBottom:'34px'}}>What I design with.</h2>
+          <div className="tool-capsules">
+            {TOOLS.map(t => (
+              <div className="tool-capsule" key={t.name}>
+                <span className="name">{t.name}</span>
+                <div className="capsule-fill" style={{'--fill': `${(t.level/5)*100}%`}}>
+                  <span className="capsule-fill-bar"></span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+        <Reveal as="div" stagger style={{marginTop:'64px'}}>
+          <p className="eyebrow">Core skills</p>
+          <h2 style={{marginBottom:'34px'}}>What I bring to a project.</h2>
+          <div className="marquee-wrap">
+            <Marquee items={row1} direction="left" />
+            <Marquee items={row2} direction="right" />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- EXPERIENCE ---------- */
+const EXPERIENCE = [
+  {
+    period:'Current', title:'App Designer (Additional Charge) & Graphic Designer', org:'QM Logics',
+    items:[
+      'Design app interfaces and user-experience elements alongside core graphic design work.',
+      'Progressed from Graphic Design Intern to a full-time Graphic Designer before taking on app design duties.',
+      'Handle all social media design for the company, producing assets and branding materials.',
+      'Collaborate across design and development teams to align visuals with app functionality.',
+    ]
+  },
+  {
+    period:'Previous', title:'Graphic Designer', org:'Evonicsoft, Bahawalpur',
+    items:[
+      'Designed social media posts and marketing visuals for a software company.',
+      'Created employee ID card designs and other internal branding materials.',
+      'Contributed basic video editing support for promotional and internal content.',
+    ]
+  },
+  {
+    period:'2021 – 2025', title:'Bachelor of Art and Design — Visual Communication Design', org:'Islamia University of Bahawalpur',
+    items:[
+      'Thesis: App Design for the Mental Health of Teenagers — a mobile app concept for teen wellness.',
+      'Applied visual communication principles to balance usability with emotional sensitivity.',
+    ]
+  },
+];
+function Experience() {
+  return (
+    <section id="experience">
+      <div className="container">
+        <Reveal className="section-head">
+          <p className="eyebrow">Where I've been</p>
+          <h2>Experience & Education.</h2>
+        </Reveal>
+        <div className="timeline">
+          {EXPERIENCE.map((e) => (
+            <Reveal className="tl-item" key={e.title}>
+              <div className="tl-dot"></div>
+              <span className="period">{e.period}</span>
+              <h3>{e.title}</h3>
+              <span className="org">{e.org}</span>
+              <ul>{e.items.map((it,i) => <li key={i}>{it}</li>)}</ul>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- TESTIMONIALS ---------- */
+const TESTIMONIALS = [
+  { quote:"Maryam turned a vague brief into a visual identity that actually felt like us. She asks the right questions before she opens Illustrator.", name:'Client Name', role:'Sample testimonial — replace me', avatar:'https://i.pravatar.cc/160?img=32' },
+  { quote:"Our app screens went from placeholder to polished in one round of revisions. Genuinely easy to work with.", name:'Client Name', role:'Sample testimonial — replace me', avatar:'https://i.pravatar.cc/160?img=12' },
+  { quote:"Thoughtful, fast, and consistent — our social pages have looked like one brand since she took over.", name:'Client Name', role:'Sample testimonial — replace me', avatar:'https://i.pravatar.cc/160?img=47' },
+];
+function TestimonialCard({ t, index }) {
+  return <div className="testi-card">
+    <div className="quote-mark" aria-hidden="true">“</div>
+    <p>{t.quote}</p>
+    <div className="testi-person">
+      <img className="testi-avatar" src={t.avatar} alt="" aria-hidden="true" loading="lazy" />
+      <div><strong>{t.name}</strong><span>{t.role}</span></div>
+    </div>
+  </div>;
+}
+function Testimonials() {
+  const [current, setCurrent] = useState(0);
+  const [fading, setFading] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const timer = useRef(null);
+  const busy = useRef(false);
+  const reduced = useRef(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const change = useCallback((next) => {
+    if (busy.current) return;
+    if (reduced.current) { setCurrent(next); return; }
+    busy.current = true;
+    setFading(true);
+    timer.current = setTimeout(() => {
+      setCurrent(next);
+      setFading(false);
+      busy.current = false;
+    }, 350);
+  }, []);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  useEffect(() => {
+    if (paused || hovered || reduced.current) return;
+    const interval = setInterval(() => change((current + 1) % TESTIMONIALS.length), 5500);
+    return () => clearInterval(interval);
+  }, [current, paused, hovered, change]);
+  return (
+    <section id="testimonials" className="testimonials">
+      <div className="container">
+        <div className="testimonial-spotlight" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+          onFocusCapture={() => setHovered(true)} onBlurCapture={e => {if (!e.currentTarget.contains(e.relatedTarget)) setHovered(false);}}>
+          <div className={`featured-testimonial ${fading ? 'fading' : ''}`} aria-live={paused ? 'polite' : 'off'}>
+            <TestimonialCard t={TESTIMONIALS[current]} index={current} />
+          </div>
+          <div className="spotlight-copy section-head">
+            <p className="eyebrow">Kind words</p>
+            <h2>What people say.</h2>
+            <p>Good design starts with listening. A little space for the people behind the projects.</p>
+            <p className="sample-note">Sample testimonials — replace with real client feedback.</p>
+            <div className="spotlight-controls">
+              <div className="carousel-arrows">
+                <button aria-label="Previous testimonial" onClick={() => change((current + TESTIMONIALS.length - 1) % TESTIMONIALS.length)}>←</button>
+                <button aria-label="Next testimonial" onClick={() => change((current + 1) % TESTIMONIALS.length)}>→</button>
+              </div>
+              <span className="slide-count">{String(current+1).padStart(2,'0')} / 03</span>
+              {!reduced.current && <button className="pause-button" onClick={() => setPaused(p => !p)}>{paused ? 'Play' : 'Pause'}</button>}
+            </div>
+            <div className="slide-dots" aria-label="Choose testimonial">
+              {TESTIMONIALS.map((t,i) => <button key={i} aria-label={`Show testimonial ${i+1}`} aria-pressed={current === i} className={current === i ? 'active' : ''} onClick={() => change(i)} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- CONTACT ---------- */
+function Contact() {
+  const [status, setStatus] = useState('idle');
+
+  const openMailFallback = (data) => {
+    const name = data.get('name') || '';
+    const email = data.get('email') || '';
+    const message = data.get('message') || '';
+    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+    window.location.href = `mailto:mayramshoaib67@gmail.com?subject=${encodeURIComponent(
+      'New message from portfolio site'
+    )}&body=${encodeURIComponent(body)}`;
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setStatus('sending');
+    const form = e.target;
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/mayramshoaib67@gmail.com', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: data,
+      });
+      if (res.ok) {
+        setStatus('sent');
+        form.reset();
+      } else {
+        openMailFallback(data);
+        setStatus('fallback');
+      }
+    } catch (err) {
+      openMailFallback(data);
+      setStatus('fallback');
+    }
+  };
+
+  return (
+    <section id="contact">
+      <div className="container contact-grid">
+        <Reveal as="div" stagger className="contact-info">
+          <p className="eyebrow">Get in touch</p>
+          <h2>Let's design<br/>something good.</h2>
+          <p>Have a project in mind, or just want to say hello? I'd love to hear from you.</p>
+          <div className="contact-line"><span className="ic">✉</span><a href="mailto:mayramshoaib67@gmail.com">mayramshoaib67@gmail.com</a></div>
+          <div className="contact-line"><span className="ic">☎</span><span>+92 310 2796867</span></div>
+          <div className="contact-line"><span className="ic">◎</span><span>Bahawalpur, Pakistan</span></div>
+          <div className="contact-line"><span className="ic">in</span><a href="https://linkedin.com/in/Maryam-shoaib" target="_blank" rel="noopener noreferrer">linkedin.com/in/Maryam-shoaib</a></div>
+        </Reveal>
+        <Reveal className="contact-form">
+          {status === 'sent' ? (
+            <div style={{padding:'40px 0', textAlign:'center'}}>
+              <h3 style={{marginBottom:'10px'}}>Message received</h3>
+              <p style={{color:'var(--ink-soft)'}}>Thank you for reaching out — I'll reply to your email soon.</p>
+            </div>
+          ) : status === 'fallback' ? (
+            <div style={{padding:'40px 0', textAlign:'center'}}>
+              <h3 style={{marginBottom:'10px'}}>Opening your email app…</h3>
+              <p style={{color:'var(--ink-soft)'}}>Just hit send there and your message will reach me directly.</p>
+            </div>
+          ) : (
+            <form onSubmit={submit}>
+              <input type="hidden" name="_subject" value="New message from portfolio site" />
+              <div className="form-row"><label>Name</label><input type="text" name="name" required placeholder="Your name" /></div>
+              <div className="form-row"><label>Email</label><input type="email" name="email" required placeholder="you@email.com" /></div>
+              <div className="form-row"><label>Message</label><textarea name="message" required placeholder="Tell me a little about your project..."></textarea></div>
+              <button type="submit" className="btn btn-primary" style={{width:'100%', justifyContent:'center'}} disabled={status === 'sending'}>
+                {status === 'sending' ? 'Sending...' : 'Send message'}
+              </button>
+            </form>
+          )}
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- FOOTER ---------- */
+function Footer() {
+  return (
+    <footer>
+      <div className="container">
+        <div className="footer-top">
+          <div>
+            <div className="footer-mark">Maryam Shoaib<span>Graphic &amp; App Designer, Bahawalpur PK</span></div>
+            <SocialLinks />
+          </div>
+          <div className="footer-links">
+            <div className="footer-col">
+              <h4>NAVIGATE</h4>
+              <a href="#about">About</a>
+              <a href="#experience">Experience</a>
+              <a href="#contact">Contact</a>
+            </div>
+            <div className="footer-col">
+              <h4>CONNECT</h4>
+              <a href="mailto:mayramshoaib67@gmail.com">Email</a>
+              <a href="https://linkedin.com/in/Maryam-shoaib" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© {new Date().getFullYear()} Maryam Shoaib. All rights reserved.</span>
+          <span>Designed with care in Bahawalpur.</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ---------- BACK TO TOP ---------- */
+function BackToTop(){
+  const [show,setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 700);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  return (
+    <button className={`back-to-top ${show ? 'show':''}`} onClick={() => window.scrollTo({top:0, behavior:'smooth'})} aria-label="Back to top">↑</button>
+  );
+}
+
+/* ---------- APP ---------- */
+function App() {
+  return (
+    <React.Fragment>
+      <Navbar />
+      <Hero />
+      <About />
+      <Services />
+      <Portfolio />
+      <Skills />
+      <Experience />
+      <Testimonials />
+      <Contact />
+      <Footer />
+      <BackToTop />
+      <MotionEffects />
+    </React.Fragment>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
